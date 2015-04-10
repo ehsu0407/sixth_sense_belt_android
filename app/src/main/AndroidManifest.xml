@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="me.eddiehsu.sixthsensebelt" >
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".DisplayMessageActivity"
+            android:label="@string/title_activity_display_message"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="me.eddiehsu.sixthsensebelt.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ModeNavigationActivity"
+            android:label="@string/title_activity_mode_navigation"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="me.eddiehsu.sixthsensebelt.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ModeSoundSenseActivity"
+            android:label="@string/title_activity_mode_sound_sense"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="me.eddiehsu.sixthsensebelt.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ModeTargetTrackingActivity"
+            android:label="@string/title_activity_mode_target_tracking"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="me.eddiehsu.sixthsensebelt.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ModeBeaconActivity"
+            android:label="@string/title_activity_mode_beacon"
+            android:parentActivityName=".ModeTargetTrackingActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="me.eddiehsu.sixthsensebelt.ModeTargetTrackingActivity" />
+        </activity>
+        <activity
+            android:name=".ModeTrackingActivity"
+            android:label="@string/title_activity_mode_tracking"
+            android:parentActivityName=".ModeTargetTrackingActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="me.eddiehsu.sixthsensebelt.ModeTargetTrackingActivity" />
+        </activity>
+        <activity
+            android:name=".NavigationCycleActivity"
+            android:label="@string/title_activity_navigation_cycle"
+            android:parentActivityName=".ModeNavigationActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="me.eddiehsu.sixthsensebelt.ModeNavigationActivity" />
+        </activity>
+    </application>
+
+</manifest>

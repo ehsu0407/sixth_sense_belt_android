@@ -1,0 +1,46 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Mode Selection"
+        android:id="@+id/textView"
+        android:textSize="40dp"
+        android:gravity="center" />
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/activity_main_button_height"
+        android:text="@string/title_activity_mode_target_tracking"
+        android:textSize="@dimen/activity_main_button_text_size"
+        android:textAllCaps="false"
+        android:onClick="startModeTargetTracking" />
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/activity_main_button_height"
+        android:text="@string/title_activity_mode_sound_sense"
+        android:textSize="@dimen/activity_main_button_text_size"
+        android:textAllCaps="false"
+        android:onClick="startModeSoundSense" />
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/activity_main_button_height"
+        android:text="@string/title_activity_mode_navigation"
+        android:textSize="@dimen/activity_main_button_text_size"
+        android:textAllCaps="false"
+        android:onClick="startModeNavigation" />
+
+
+</LinearLayout>
