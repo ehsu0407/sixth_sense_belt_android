@@ -1,6 +1,5 @@
 package me.eddiehsu.sixthsensebelt;
 
-import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
