@@ -69,6 +69,14 @@
         <activity
             android:name=".NavigationCycleActivity"
             android:label="@string/title_activity_navigation_cycle"
+            android:parentActivityName=".NavigationVerifyAddressActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="me.eddiehsu.sixthsensebelt.NavigationVerifyAddressActivity" />
+        </activity>
+        <activity
+            android:name=".NavigationVerifyAddressActivity"
+            android:label="@string/title_activity_navigation_verify_address"
             android:parentActivityName=".ModeNavigationActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

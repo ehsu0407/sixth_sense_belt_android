@@ -1,14 +1,19 @@
 package me.eddiehsu.sixthsensebelt;
 
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,9 +30,23 @@ import java.util.Date;
 
 
 public class NavigationCycleActivity extends ActionBarActivity implements
-        ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
+        ConnectionCallbacks, OnConnectionFailedListener, LocationListener, SensorEventListener {
 
     protected static final String TAG = "location-updates-sample";
+
+    // define the display assembly compass picture
+    protected ImageView image;
+
+    // record the compass picture angle turned
+    protected float currentDegree = 0f;
+
+    // Destination bearing
+    protected double destBearing;
+
+    // device sensor manager
+    protected SensorManager mSensorManager;
+
+
 
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
@@ -43,31 +62,30 @@ public class NavigationCycleActivity extends ActionBarActivity implements
 
     // Keys for storing activity state in the Bundle.
     protected final static String REQUESTING_LOCATION_UPDATES_KEY = "requesting-location-updates-key";
-    protected final static String LOCATION_KEY = "location-key";
+    protected final static String CUR_LOCATION_KEY = "cur-location-key";
+    protected final static String DEST_LOCATION_KEY = "dest-location-key";
     protected final static String LAST_UPDATED_TIME_STRING_KEY = "last-updated-time-string-key";
 
-    /**
-     * Provides the entry point to Google Play services.
-     */
+    // Provides the entry point to Google Play services.
     protected GoogleApiClient mGoogleApiClient;
 
-    /**
-     * Stores parameters for requests to the FusedLocationProviderApi.
-     */
+    // Stores parameters for requests to the FusedLocationProviderApi.
     protected LocationRequest mLocationRequest;
 
-    /**
-     * Represents a geographical location.
-     */
+    // Represents a geographical location.
     protected Location mCurrentLocation;
 
+    // Destination location
+    protected Location mDestLocation;
+
     // UI Widgets.
-    protected Button mStartUpdatesButton;
-    protected Button mStopUpdatesButton;
     protected TextView mLastUpdateTimeTextView;
     protected TextView mLatitudeTextView;
     protected TextView mLongitudeTextView;
     protected TextView addressTextView;
+    protected TextView tvHeading;
+    protected TextView mDestBearing;
+
 
     /**
      * Tracks the status of the location updates request. Value changes when the user presses the
@@ -87,24 +105,30 @@ public class NavigationCycleActivity extends ActionBarActivity implements
 
         // Get the message from the intent
         Intent intent = getIntent();
-        String message = intent.getStringExtra(ModeNavigationActivity.ADDRESS_ENTRY);
+        mDestLocation = new Location(TAG);
+        mDestLocation.setLatitude(intent.getDoubleExtra(NavigationVerifyAddressActivity.NAVI_LAT, 0));
+        mDestLocation.setLongitude(intent.getDoubleExtra(NavigationVerifyAddressActivity.NAVI_LONG, 0));
 
         // Locate the UI widgets.
         addressTextView = (TextView) findViewById((R.id.address_text));
-        mStartUpdatesButton = (Button) findViewById(R.id.start_updates_button);
-        mStopUpdatesButton = (Button) findViewById(R.id.stop_updates_button);
         mLatitudeTextView = (TextView) findViewById(R.id.latitude_text);
         mLongitudeTextView = (TextView) findViewById(R.id.longitude_text);
         mLastUpdateTimeTextView = (TextView) findViewById(R.id.last_update_time_text);
+        image = (ImageView) findViewById(R.id.imageViewCompass);
+        tvHeading = (TextView) findViewById(R.id.tvHeading);
+        mDestBearing = (TextView) findViewById(R.id.dest_bearing);
 
-        mRequestingLocationUpdates = false;
+        mRequestingLocationUpdates = true;
         mLastUpdateTime = "";
+
+        // initialize your android device sensor capabilities
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
         // Update values using data stored in the Bundle.
         updateValuesFromBundle(savedInstanceState);
 
         // Update the address
-        addressTextView.setText(message);
+        addressTextView.setText(Double.toString(mDestLocation.getLatitude()) + " " + Double.toString(mDestLocation.getLongitude()));
 
         buildGoogleApiClient();
     }
@@ -122,21 +146,20 @@ public class NavigationCycleActivity extends ActionBarActivity implements
             if (savedInstanceState.keySet().contains(REQUESTING_LOCATION_UPDATES_KEY)) {
                 mRequestingLocationUpdates = savedInstanceState.getBoolean(
                         REQUESTING_LOCATION_UPDATES_KEY);
-                setButtonsEnabledState();
             }
 
             // Update the value of mCurrentLocation from the Bundle and update the UI to show the
             // correct latitude and longitude.
-            if (savedInstanceState.keySet().contains(LOCATION_KEY)) {
+            if (savedInstanceState.keySet().contains(CUR_LOCATION_KEY)) {
                 // Since LOCATION_KEY was found in the Bundle, we can be sure that mCurrentLocation
                 // is not null.
-                mCurrentLocation = savedInstanceState.getParcelable(LOCATION_KEY);
+                mCurrentLocation = savedInstanceState.getParcelable(CUR_LOCATION_KEY);
             }
 
             // Update the value of mLastUpdateTime from the Bundle and update the UI.
             if (savedInstanceState.keySet().contains(LAST_UPDATED_TIME_STRING_KEY)) {
                 mLastUpdateTime = savedInstanceState.getString(LAST_UPDATED_TIME_STRING_KEY);
-            }
+        }
             updateUI();
         }
     }
@@ -185,45 +208,6 @@ public class NavigationCycleActivity extends ActionBarActivity implements
     }
 
     /**
-     * Handles the Start Updates button and requests start of location updates. Does nothing if
-     * updates have already been requested.
-     */
-    public void startUpdatesButtonHandler(View view) {
-        if (!mRequestingLocationUpdates) {
-            mRequestingLocationUpdates = true;
-            setButtonsEnabledState();
-            startLocationUpdates();
-        }
-    }
-
-    /**
-     * Handles the Stop Updates button, and requests removal of location updates. Does nothing if
-     * updates were not previously requested.
-     */
-    public void stopUpdatesButtonHandler(View view) {
-        if (mRequestingLocationUpdates) {
-            mRequestingLocationUpdates = false;
-            setButtonsEnabledState();
-            stopLocationUpdates();
-        }
-    }
-
-    /**
-     * Ensures that only one button is enabled at any time. The Start Updates button is enabled
-     * if the user is not requesting location updates. The Stop Updates button is enabled if the
-     * user is requesting location updates.
-     */
-    private void setButtonsEnabledState() {
-        if (mRequestingLocationUpdates) {
-            mStartUpdatesButton.setEnabled(false);
-            mStopUpdatesButton.setEnabled(true);
-        } else {
-            mStartUpdatesButton.setEnabled(true);
-            mStopUpdatesButton.setEnabled(false);
-        }
-    }
-
-    /**
      * Updates the latitude, the longitude, and the last location time in the UI.
      */
     private void updateUI() {
@@ -231,6 +215,7 @@ public class NavigationCycleActivity extends ActionBarActivity implements
             mLatitudeTextView.setText(String.valueOf(mCurrentLocation.getLatitude()));
             mLongitudeTextView.setText(String.valueOf(mCurrentLocation.getLongitude()));
             mLastUpdateTimeTextView.setText(mLastUpdateTime);
+            mDestBearing.setText(String.valueOf(destBearing));
         }
     }
 
@@ -264,7 +249,7 @@ public class NavigationCycleActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
         // Within {@code onPause()}, we pause location updates, but leave the
         // connection to GoogleApiClient intact.  Here, we resume receiving
@@ -273,6 +258,11 @@ public class NavigationCycleActivity extends ActionBarActivity implements
         if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
             startLocationUpdates();
         }
+
+        // for the system's orientation sensor registered listeners
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+            SensorManager.SENSOR_DELAY_GAME);
+
     }
 
     @Override
@@ -282,6 +272,9 @@ public class NavigationCycleActivity extends ActionBarActivity implements
         if (mGoogleApiClient.isConnected()) {
             stopLocationUpdates();
         }
+
+        // to stop the listener and save battery
+        mSensorManager.unregisterListener(this);
     }
 
     @Override
@@ -328,6 +321,8 @@ public class NavigationCycleActivity extends ActionBarActivity implements
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        destBearing = getDestBearing(location.getLatitude(), location.getLongitude(),
+                mDestLocation.getLatitude(), mDestLocation.getLongitude());
         updateUI();
         Toast.makeText(this, getResources().getString(R.string.location_updated_message),
                 Toast.LENGTH_SHORT).show();
@@ -348,15 +343,66 @@ public class NavigationCycleActivity extends ActionBarActivity implements
         Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
     }
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        // get the angle around the z-axis rotated
+        float degree = Math.round(event.values[0]);
+
+        tvHeading.setText("Heading: " + Float.toString(degree) + " degrees");
+
+        // create a rotation animation (reverse turn degree degrees)
+        RotateAnimation ra = new RotateAnimation(
+                currentDegree,
+                -degree,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF,
+                0.5f);
+
+        // how long the animation will take place
+        ra.setDuration(210);
+
+        // set the animation after the end of the reservation status
+        ra.setFillAfter(true);
+
+        // Start the animation
+        image.startAnimation(ra);
+        currentDegree = -degree;
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // not in use
+    }
+
 
     /**
      * Stores activity data in the Bundle.
      */
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY, mRequestingLocationUpdates);
-        savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
+        savedInstanceState.putParcelable(CUR_LOCATION_KEY, mCurrentLocation);
+        savedInstanceState.putParcelable(DEST_LOCATION_KEY, mDestLocation);
         savedInstanceState.putString(LAST_UPDATED_TIME_STRING_KEY, mLastUpdateTime);
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+    private double getDestBearing(double slat, double slong, double dlat, double dlong) {
+        // Given a source and destination, determine the direction of travel from north (0 degrees)
+
+        double dLon = (dlong - slong);
+
+        double y = Math.sin(dLon) * Math.cos(dlat);
+        double x = Math.cos(slat) * Math.sin(dlat) - Math.sin(slat)
+                * Math.cos(dlat) * Math.cos(dLon);
+
+        double brng = Math.atan2(y, x);
+
+        brng = Math.toDegrees(brng);
+        brng = (brng + 360) % 360;
+        brng = 360 - brng;
+
+        return brng;
     }
 
     @Override

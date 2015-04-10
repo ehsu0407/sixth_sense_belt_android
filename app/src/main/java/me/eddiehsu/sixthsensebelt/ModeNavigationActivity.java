@@ -41,9 +41,9 @@ public class ModeNavigationActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /** Called when the user clicks the start tracking button */
+    /** Called when the user clicks the submit button */
     public void startNavigationCycleActivity(View view) {
-        Intent intent = new Intent(this, NavigationCycleActivity.class);
+        Intent intent = new Intent(this, NavigationVerifyAddressActivity.class);
         EditText raw_address = (EditText) findViewById(R.id.navigation_address_entry);
         String address = raw_address.getText().toString();
         intent.putExtra(ADDRESS_ENTRY, address);
