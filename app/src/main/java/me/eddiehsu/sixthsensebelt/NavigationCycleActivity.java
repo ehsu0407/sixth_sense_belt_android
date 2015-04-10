@@ -348,7 +348,7 @@ public class NavigationCycleActivity extends ActionBarActivity implements
 
         // get the angle around the z-axis rotated
         float degree = Math.round(event.values[0]);
-        float neededDegree = (float)destBearing - degree;
+        float neededDegree = ((degree - (float)destBearing) + 360 % 360);
 
         tvHeading.setText("Heading: " + Float.toString(degree) + " degrees");
 
