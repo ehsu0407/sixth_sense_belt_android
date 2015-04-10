@@ -324,8 +324,8 @@ public class NavigationCycleActivity extends ActionBarActivity implements
         destBearing = getDestBearing(location.getLatitude(), location.getLongitude(),
                 mDestLocation.getLatitude(), mDestLocation.getLongitude());
         updateUI();
-        Toast.makeText(this, getResources().getString(R.string.location_updated_message),
-                Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, getResources().getString(R.string.location_updated_message),
+//                Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -348,13 +348,14 @@ public class NavigationCycleActivity extends ActionBarActivity implements
 
         // get the angle around the z-axis rotated
         float degree = Math.round(event.values[0]);
+        float neededDegree = (float)destBearing - degree;
 
         tvHeading.setText("Heading: " + Float.toString(degree) + " degrees");
 
         // create a rotation animation (reverse turn degree degrees)
         RotateAnimation ra = new RotateAnimation(
                 currentDegree,
-                -degree,
+                -neededDegree,
                 Animation.RELATIVE_TO_SELF, 0.5f,
                 Animation.RELATIVE_TO_SELF,
                 0.5f);
@@ -367,7 +368,7 @@ public class NavigationCycleActivity extends ActionBarActivity implements
 
         // Start the animation
         image.startAnimation(ra);
-        currentDegree = -degree;
+        currentDegree = -neededDegree;
     }
 
     @Override
