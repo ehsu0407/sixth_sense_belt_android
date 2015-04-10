@@ -15,7 +15,6 @@ import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -32,53 +31,18 @@ import java.util.Date;
 public class NavigationCycleActivity extends ActionBarActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, LocationListener, SensorEventListener {
 
+    // Define constants
     protected static final String TAG = "location-updates-sample";
-
-    // define the display assembly compass picture
-    protected ImageView image;
-
-    // record the compass picture angle turned
-    protected float currentDegree = 0f;
-
-    // Destination bearing
-    protected double destBearing;
-
-    // device sensor manager
-    protected SensorManager mSensorManager;
-
-
-
-    /**
-     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
-     */
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-
-    /**
-     * The fastest rate for active location updates. Exact. Updates will never be more frequent
-     * than this value.
-     */
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
-
-    // Keys for storing activity state in the Bundle.
     protected final static String REQUESTING_LOCATION_UPDATES_KEY = "requesting-location-updates-key";
     protected final static String CUR_LOCATION_KEY = "cur-location-key";
     protected final static String DEST_LOCATION_KEY = "dest-location-key";
     protected final static String LAST_UPDATED_TIME_STRING_KEY = "last-updated-time-string-key";
 
-    // Provides the entry point to Google Play services.
-    protected GoogleApiClient mGoogleApiClient;
-
-    // Stores parameters for requests to the FusedLocationProviderApi.
-    protected LocationRequest mLocationRequest;
-
-    // Represents a geographical location.
-    protected Location mCurrentLocation;
-
-    // Destination location
-    protected Location mDestLocation;
-
-    // UI Widgets.
+    // UI elements
+    protected ImageView image;
     protected TextView mLastUpdateTimeTextView;
     protected TextView mLatitudeTextView;
     protected TextView mLongitudeTextView;
@@ -86,16 +50,15 @@ public class NavigationCycleActivity extends ActionBarActivity implements
     protected TextView tvHeading;
     protected TextView mDestBearing;
 
-
-    /**
-     * Tracks the status of the location updates request. Value changes when the user presses the
-     * Start Updates and Stop Updates buttons.
-     */
+    // Declare variables
+    protected float currentDegree = 0f;
+    protected double destBearing;
+    protected SensorManager mSensorManager;
+    protected GoogleApiClient mGoogleApiClient;
+    protected LocationRequest mLocationRequest;
+    protected Location mCurrentLocation;
+    protected Location mDestLocation;
     protected Boolean mRequestingLocationUpdates;
-
-    /**
-     * Time when the location was updated represented as a String.
-     */
     protected String mLastUpdateTime;
 
     @Override

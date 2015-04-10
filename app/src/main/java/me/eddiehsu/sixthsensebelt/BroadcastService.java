@@ -4,16 +4,29 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationServices;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -42,6 +55,7 @@ public class BroadcastService extends IntentService implements
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_GET_LOCATION.equals(action)) {
+                // TODO: Instead of connecting and disconnecting every time, maintain the connection.
                 // Start the google api connection to update mLastLocation
                 buildGoogleApiClient();
                 mGoogleApiClient.connect();
@@ -69,9 +83,42 @@ public class BroadcastService extends IntentService implements
     public void onConnected(Bundle connectionHint) {
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLastLocation != null) {
-            // TODO: Post the location to the web.
+
+            // Post the location to the web.
+
+            // Instantiate the RequestQueue.
+            RequestQueue request_queue = Volley.newRequestQueue(this);
+
+            // Request a string response from the provided URL.
+            final String URL = "http://50.148.113.36:8001/api/v1/locationlog/?format=json";
+            // Post params to be sent to the server
+            HashMap<String, String> params = new HashMap<String, String>();
+            params.put("latitude", String.valueOf(mLastLocation.getLatitude()));
+            params.put("longitude", String.valueOf(mLastLocation.getLongitude()));
+            params.put("device_id", "/api/v1/device/1/");
+
+            JsonObjectRequest req = new JsonObjectRequest(URL, new JSONObject(params),
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                VolleyLog.v("Response:%n %s", response.toString(4));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    VolleyLog.e("Error: ", error.getMessage());
+                }
+            });
+
+            // add the request object to the queue to be executed
+            request_queue.add(req);
+
             Log.i(TAG, "Connected, last location is: " + String.valueOf(mLastLocation.getLatitude()) + ", " +
-                String.valueOf(mLastLocation.getLongitude()));
+                    String.valueOf(mLastLocation.getLongitude()));
         }
     }
 
