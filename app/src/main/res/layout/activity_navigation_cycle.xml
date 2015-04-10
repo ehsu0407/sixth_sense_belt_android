@@ -13,7 +13,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="Address:" />
+        android:text="Address:"
+        android:textSize="@dimen/default_text_size" />
 
     <TextView
         android:id="@+id/address_text"
@@ -22,16 +23,15 @@
         android:layout_alignBaseline="@+id/address_label"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@+id/address_label"
-        android:textIsSelectable="true" />
+        android:textSize="@dimen/default_text_size" />
 
     <TextView
         android:id="@+id/dest_bearing"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="40dp"
-        android:layout_marginTop="20dp"
-        android:text="Destination Bearing: 0.0" />
+        android:text="Destination Bearing: 0.0"
+        android:textSize="@dimen/default_text_size" />
 
     <TextView
         android:id="@+id/latitude_label"
@@ -95,7 +95,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="40dp"
         android:layout_marginTop="20dp"
-        android:text="Heading: 0.0" />
+        android:text="Heading: 0.0"
+        android:textSize="@dimen/default_text_size" />
 
     <ImageView
         android:id="@+id/imageViewCompass"

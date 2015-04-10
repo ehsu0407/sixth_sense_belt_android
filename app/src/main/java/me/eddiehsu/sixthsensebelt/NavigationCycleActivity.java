@@ -215,7 +215,7 @@ public class NavigationCycleActivity extends ActionBarActivity implements
             mLatitudeTextView.setText(String.valueOf(mCurrentLocation.getLatitude()));
             mLongitudeTextView.setText(String.valueOf(mCurrentLocation.getLongitude()));
             mLastUpdateTimeTextView.setText(mLastUpdateTime);
-            mDestBearing.setText(String.valueOf(destBearing));
+            mDestBearing.setText("Destination Bearing: " + String.valueOf(destBearing));
         }
     }
 
@@ -404,6 +404,20 @@ public class NavigationCycleActivity extends ActionBarActivity implements
         brng = 360 - brng;
 
         return brng;
+    }
+
+    private String getRouteSteps(double slat, double slong, double dlat, double dlong) {
+        String url = "https://maps.google.com/maps?f=d&hl=en&saddr=" +
+                String.valueOf(slat) +
+                "," +
+                String.valueOf(slong) +
+                "&daddr=" +
+                String.valueOf(dlat) +
+                "," +
+                String.valueOf(dlong) +
+                "&ie=UTF8&om=0&z=20&output=kml";
+        return "";
+        // TODO: Finish this.
     }
 
     @Override
